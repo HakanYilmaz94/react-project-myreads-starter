@@ -27,7 +27,6 @@ class SearchBook extends Component {
                         library.forEach(function (el) {
                             if (el.id === book.id) {
                                 book.shelf = el.shelf
-
                             } else {
                                 book.shelf = 'none';
                             }
@@ -39,7 +38,7 @@ class SearchBook extends Component {
                             authors: book.authors,
                             title: book.title,
                             imageLinks: {
-                                thumbnail: book.imageLinks.thumbnail
+                                thumbnail: book.imageLinks !== undefined && book.imageLinks.thumbnail !== undefined ? book.imageLinks.thumbnail : null
                             }
                         }
                     });
@@ -52,7 +51,18 @@ class SearchBook extends Component {
 
     render() {
 
-        const {} = this.props;
+        const {books} = this.props;
+
+        this.state.resultBooks.forEach(function(searchedBook){
+            books.forEach(function(book){
+                if (book.id === searchedBook.id) {
+                    searchedBook.shelf = book.shelf;
+                }
+            });
+            if(!searchedBook.shelf){
+                searchedBook.shelf = 'none';
+            }
+        })
 
         return (
             <div className="search-books">

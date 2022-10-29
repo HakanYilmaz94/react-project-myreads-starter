@@ -7,54 +7,45 @@ import './App.css'
 
 
 class App extends Component {
-  state = {
-    books: [],
-    showSearchPage: false,
-    resultBooks: []
-  }
-    componentDidMount() {
-    BooksAPI.getAll().then((books) => {
-     this.setState({ books })
-    })
-  }
-
-  changeShelf(book, shelf){
-    const index = this.state.books.findIndex((key) => {
-      return key.id === book.id;
-    });
-    let tempList = this.state.books;
-
-    if (index === -1) {
-      book.shelf = shelf;
-      tempList.push(book);
-    } else {
-      tempList[index].shelf = shelf;
+    state = {
+        books: []
     }
 
-    BooksAPI.update(book, shelf).then(
-      this.setState({ books: tempList })
-    );
-}
+    bookshelves = ['currentlyReading', 'read', 'wantToRead'];
 
-  render() {
-    return (
-      <div className='app'>
-      <Route exact path="/" render={() => (
-        <ListBooks
-          onChangeShelf={this.changeShelf.bind(this)}
-          books={this.state.books}
-          shelf={['currentlyReading', 'read', 'wantToRead']}/>
+    componentDidMount() {
+        BooksAPI.getAll().then((books) => {
+            this.setState({books})
+        })
+    }
 
-        )}/>
-      <Route path="/search" render={() => (
-        <SearchBook
-            onChangeShelf={this.changeShelf.bind(this)}
-            books={this.state.books}
-          />
-        )}/>
-      </div>
-    )
-  }
+    changeShelf = (book, shelf) => {
+        book.shelf = shelf;
+        this.setState((state) => ({
+            books: state.books.filter((tempBook) => tempBook.id !== book.id).concat([book])
+        }))
+        BooksAPI.update(book, shelf);
+    }
+
+    render() {
+        const {books} = this.state;
+        return (
+            <div className='app'>
+                <Route exact path="/" render={() => (
+                    <ListBooks
+                        onChangeShelf={this.changeShelf.bind(this)}
+                        books={books}
+                        shelf={this.bookshelves}/>
+                )}/>
+                <Route path="/search" render={() => (
+                    <SearchBook
+                        onChangeShelf={this.changeShelf.bind(this)}
+                        books={books}
+                    />
+                )}/>
+            </div>
+        )
+    }
 }
 
 export default App;
